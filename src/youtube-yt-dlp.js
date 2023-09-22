@@ -78,44 +78,43 @@ export default class YoutubeYtdlp {
       pulse.emit("youtube:crawling:start", { playlists: videoFolderPaths })
 
       //const videoFolderPath = videoFolderPaths[0]
-      const videos = videoFolderPaths.map(async videoFolderPath => {
-        //const videoFolderPath = `${pathToSource}/${channelFolderName}/${videoFolderName}`
-        const videoName = videoFolderPath.split("/").slice(-1)[0]
-        const ytdl = new Ytdl(videoFolderPath, videoName)
+      const videos = await Promise.all(
+        videoFolderPaths.map(async videoFolderPath => {
+          //const videoFolderPath = `${pathToSource}/${channelFolderName}/${videoFolderName}`
+          const videoName = videoFolderPath.split("/").slice(-1)[0]
+          const ytdl = new Ytdl(videoFolderPath, videoName)
 
-        const channelMetadata = ytdl.convertToInstantSearchChannel()
-        const videoMetadata = ytdl.convertToInstantSearchVideo()
-        //if (debug) console.log("getVideosFromPlaylist VIDEOMETADATA", channelFolderName, videoMetadata)
+          const channelMetadata = ytdl.convertToInstantSearchChannel()
+          const videoMetadata = ytdl.convertToInstantSearchVideo()
+          //if (debug) console.log("getVideosFromPlaylist VIDEOMETADATA", videoName, videoMetadata)
 
-        const videoUrl = videoMetadata.url
-        const captionsArray = await ytdl.convertToInstantSearchCaptions(videoUrl)
-        if (debug) console.log("getVideosFromPlaylist CAPTIONSARRAY", channelFolderName, captionsArray?.length)
-        const playlistMetadata = ytdl.convertToInstantSearchPlaylist()
+          const videoUrl = videoMetadata.url
+          const captionsArray = await ytdl.convertToInstantSearchCaptions(videoUrl)
+          if (debug) console.log("getVideosFromPlaylist CAPTIONSARRAY", captionsArray?.length, videoName)
+          const playlistMetadata = ytdl.convertToInstantSearchPlaylist()
 
-        // Keep only videos with captions
-        if (captionsArray) {
-          let video = {
-            ...videoMetadata,
-            channel: channelMetadata,
-            playlist: playlistMetadata,
-            captions: captionsArray.map(caption => {
-              return {
-                id: `${videoMetadata.id}__${caption.position}`,
-                ...caption,
-                video: videoMetadata,
-              }
-            }),
+          // Keep only videos with captions
+          if (captionsArray) {
+            let video = {
+              ...videoMetadata,
+              channel: channelMetadata,
+              playlist: playlistMetadata,
+              captions: captionsArray.map(caption => {
+                return {
+                  id: `${videoMetadata.id}__${caption.position}`,
+                  ...caption,
+                  video: videoMetadata,
+                }
+              }),
+            }
+            //if (debug) console.log("getVideosFromPlaylist VIDEO : ", videoName, video)
+
+            return video
           }
-          //if (debug) console.log("getVideosFromPlaylist VIDEO", video)
+        })
+      )
 
-          return video
-        }
-      })
-
-      // Resolve all pending promises in videos
-      await Promise.all(videos)
-
-      if (debug) console.log("getVideosFromPlaylist VIDEOS", videos.length, videos.slice(10, 12))
+      if (debug) console.log("getVideosFromPlaylist VIDEOS : ", videos.length, channelFolderName, videos.slice(0, 2))
 
       pulse.emit("playlist:end", { videos })
 
@@ -264,7 +263,7 @@ export default class YoutubeYtdlp {
       const videos = await this.getVideosFromPlaylist(pathToSource, channelFolderName)
 
       console.log("")
-      console.log("getVideosFromYtdlpFolder VIDEOS", videos.length)
+      console.log("getVideosFromYtdlpFolder VIDEOS", videos.length, channelFolderName)
 
       await fileutils.writeJson(`./cache/${configName}/youtube-yt-dlp/${channelFolderName}.json`, videos)
 
