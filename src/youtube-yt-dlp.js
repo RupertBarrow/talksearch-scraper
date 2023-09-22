@@ -85,11 +85,11 @@ export default class YoutubeYtdlp {
 
         const channelMetadata = ytdl.convertToInstantSearchChannel()
         const videoMetadata = ytdl.convertToInstantSearchVideo()
-        //if (debug) console.log("getVideosFromPlaylist VIDEOMETADATA", videoMetadata)
+        //if (debug) console.log("getVideosFromPlaylist VIDEOMETADATA", channelFolderName, videoMetadata)
 
         const videoUrl = videoMetadata.url
         const captionsArray = await ytdl.convertToInstantSearchCaptions(videoUrl)
-        if (debug) console.log("getVideosFromPlaylist CAPTIONSARRAY", captionsArray?.length)
+        if (debug) console.log("getVideosFromPlaylist CAPTIONSARRAY", channelFolderName, captionsArray?.length)
         const playlistMetadata = ytdl.convertToInstantSearchPlaylist()
 
         // Keep only videos with captions
@@ -106,7 +106,7 @@ export default class YoutubeYtdlp {
               }
             }),
           }
-          if (debug) console.log("getVideosFromPlaylist VIDEO", video)
+          //if (debug) console.log("getVideosFromPlaylist VIDEO", video)
 
           return video
         }
@@ -115,7 +115,7 @@ export default class YoutubeYtdlp {
       // Resolve all pending promises in videos
       await Promise.all(videos)
 
-      if (debug) console.log("getVideosFromPlaylist VIDEOS", videos)
+      if (debug) console.log("getVideosFromPlaylist VIDEOS", videos.length, videos.slice(10, 12))
 
       pulse.emit("playlist:end", { videos })
 
@@ -208,6 +208,7 @@ export default class YoutubeYtdlp {
       pathToSource: "/Volumes/Altius Backup Box/LA RÉALITÉ Vidéos/yt-dlp downloads/Youtube",
       channels: [
         "Aquarius Rising Africa Ⅱ",
+        "116000 Enfants Disparus",
         /*
         "The reveal report",
         "Right on Radio CH 2",
@@ -216,7 +217,6 @@ export default class YoutubeYtdlp {
         "Alexandre Lebreton - chaîne secondaire",
         "ALEXIS DU REAU ACTEUR OFFICIEL",
         "60 Minutes Australia",
-        "116000 Enfants Disparus",
         "Espagne  - un bébé contre des papiers  - Désintox - ARTE",
         */
       ],

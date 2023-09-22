@@ -101,9 +101,13 @@ const module = {
     _.set(videoDetails, "title", video.title)
     _.set(videoDetails, "url", video.url)
     _.set(videoDetails, "duration", video.duration) // in seconds
-    _.set(videoDetails, "thumbnail", video.thumbnails.default.url)
     _.set(videoDetails, "popularity.score", this.getPopularityScore(video))
     _.set(videoDetails, "publishedDate", this.getBucketedDate(video.publishedDate))
+    try {
+      _.set(videoDetails, "thumbnail", video.thumbnails.default.url)
+    } catch (error) {
+      // NOTHING : in case the thumbnail cannot be found
+    }
 
     // Base record metadata to add to all records
     let baseRecord = {

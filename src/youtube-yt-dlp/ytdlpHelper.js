@@ -52,8 +52,9 @@ export default class Ytdl {
 
       return captions
     } catch (error) {
-      console.error("ERROR in convertToInstantSearchCaptions", error)
-      return null
+      console.log("convertToInstantSearchCaptions : pas de sous-titres pour cette vidéo : ", this.videoName)
+      //console.error("ERROR in convertToInstantSearchCaptions", error)
+      return []
     }
   }
 
@@ -70,7 +71,7 @@ export default class Ytdl {
     return {
         id:          this.videoInfo.id,
         title:       this.videoInfo.fulltitle,
-        description: this.videoInfo.description,
+        //description: this.videoInfo.description,
         languageCode: "fr",
         thumbnails: {
           default: {
