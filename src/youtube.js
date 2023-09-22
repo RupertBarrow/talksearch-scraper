@@ -1,15 +1,18 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
 import dayjs from 'dayjs';
-import diskLogger from './disk-logger';
-import fileutils from './fileutils';
-import globals from './globals';
+import diskLogger from './disk-logger.js';
+import fileutils from './fileutils.js';
+import globals from './globals.js';
 import pMap from 'p-map';
 import parseIsoDuration from 'parse-iso-duration';
-import pulse from './pulse';
+import pulse from './pulse.js';
 import qs from 'query-string';
 import _ from 'lodash';
-import { forEach, map } from 'p-iteration';
+
+// import { forEach, map } from 'p-iteration';
+import pkg from 'p-iteration';
+const { forEach, map } = pkg;
 
 const module = {
   /**

@@ -8,7 +8,7 @@ import pMap from 'p-map';
 import youtube from '../src/youtube.js';
 import prettier from 'prettier';
 import algoliasearch from 'algoliasearch';
-import globals from '../src/globals';
+import globals from '../src/globals.js';
 
 const newConfig = {
   // Open a prompt and wait for the answer

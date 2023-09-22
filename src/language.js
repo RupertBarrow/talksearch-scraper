@@ -1,12 +1,12 @@
-import pulse from './pulse';
-import globals from './globals';
-import fileutils from './fileutils';
-import diskLogger from './disk-logger';
-import language from '@google-cloud/language';
-import pMap from 'p-map';
-import uuid from 'uuid/v1';
-import _ from 'lodash';
-let CLIENT;
+import pulse from "./pulse.js"
+import globals from "./globals.js"
+import fileutils from "./fileutils.js"
+import diskLogger from "./disk-logger.js"
+//import language from '@google-cloud/language';
+import pMap from "p-map"
+//import uuid from "uuid/v1"
+import _ from "lodash"
+let CLIENT
 
 const cache = {
   STORE: {},
@@ -18,7 +18,7 @@ const cache = {
    * Note: This is used for tests, to be able to manipulate the private data
    **/
   get() {
-    return this.STORE;
+    return this.STORE
   },
 
   /**
@@ -28,7 +28,7 @@ const cache = {
    * Note: This is used for tests, to be able to manipulate the private data
    **/
   set(newCache) {
-    this.STORE = newCache;
+    this.STORE = newCache
   },
 
   /**
@@ -36,7 +36,7 @@ const cache = {
    * @return {String} Filepath, relative to the config
    **/
   filepath() {
-    return `./cache/${globals.configName()}/language/cache.json`;
+    return `./cache/${globals.configName()}/language/cache.json`
   },
 
   /**
@@ -44,9 +44,9 @@ const cache = {
    * @return {Void}
    **/
   async grab() {
-    const cacheFile = this.filepath();
-    const cacheContent = await fileutils.readJson(cacheFile);
-    this.set(cacheContent || {});
+    const cacheFile = this.filepath()
+    const cacheContent = await fileutils.readJson(cacheFile)
+    this.set(cacheContent || {})
   },
 
   /**
@@ -54,8 +54,8 @@ const cache = {
    * @return {Void}
    **/
   async release() {
-    const cacheFile = this.filepath();
-    await fileutils.writeJson(cacheFile, this.get());
+    const cacheFile = this.filepath()
+    await fileutils.writeJson(cacheFile, this.get())
   },
 
   /**
@@ -65,17 +65,17 @@ const cache = {
    * @return {Array|Boolean} false if no result, the array of entities otherwise
    **/
   read(videoId, input) {
-    const shouldUseCache = globals.readFromCache();
+    const shouldUseCache = globals.readFromCache()
     if (!shouldUseCache) {
-      return false;
+      return false
     }
 
-    const cacheVideoEntries = _.get(this.get(), videoId);
+    const cacheVideoEntries = _.get(this.get(), videoId)
     if (!cacheVideoEntries) {
-      return false;
+      return false
     }
 
-    return _.get(_.find(cacheVideoEntries, { input }), 'entities', false);
+    return _.get(_.find(cacheVideoEntries, { input }), "entities", false)
   },
 
   /**
@@ -89,22 +89,22 @@ const cache = {
    **/
   write(videoId, input, entities) {
     if (!globals.readFromCache()) {
-      return false;
+      return false
     }
 
-    const newCache = this.get();
+    const newCache = this.get()
 
     if (!newCache[videoId]) {
-      newCache[videoId] = [];
+      newCache[videoId] = []
     }
 
-    newCache[videoId].push({ input, entities });
+    newCache[videoId].push({ input, entities })
 
-    this.set(newCache);
+    this.set(newCache)
 
-    return true;
+    return true
   },
-};
+}
 
 const module = {
   cache: _.bindAll(cache, _.functions(cache)),
@@ -114,9 +114,9 @@ const module = {
    **/
   client() {
     if (CLIENT) {
-      return CLIENT;
+      return CLIENT
     }
-    return (CLIENT = new language.LanguageServiceClient());
+    return (CLIENT = new language.LanguageServiceClient())
   },
 
   /**
@@ -125,12 +125,12 @@ const module = {
    * @returns {Object} The enriched video
    */
   async enrichVideo(video) {
-    const speakers = await this.getSpeakers(video);
+    const speakers = await this.getSpeakers(video)
 
-    const newVideo = video;
-    _.set(newVideo, 'speakers', speakers);
+    const newVideo = video
+    _.set(newVideo, "speakers", speakers)
 
-    return newVideo;
+    return newVideo
   },
 
   /**
@@ -140,22 +140,18 @@ const module = {
    * @returns {Void}
    **/
   handleGoogleApiErrors(err, videoId) {
-    const message = err.message;
+    const message = err.message
     // We catch "missing credentials" error. This is a hard error, the whole
     // process needs to stop
-    if (_.includes(message, 'Could not load the default credentials')) {
-      console.info('Unable to load Google Natural Language API credentials');
-      console.info(
-        'Make sure you have GOOGLE_APPLICATION_CREDENTIALS set to the path to your google.service-account-file.json file'
-      );
-      console.info(
-        "If you don't have a service-account.json file, create one on https://console.cloud.google.com/apis/credentials/serviceaccountkey"
-      );
-      this.stopProcess();
+    if (_.includes(message, "Could not load the default credentials")) {
+      console.info("Unable to load Google Natural Language API credentials")
+      console.info("Make sure you have GOOGLE_APPLICATION_CREDENTIALS set to the path to your google.service-account-file.json file")
+      console.info("If you don't have a service-account.json file, create one on https://console.cloud.google.com/apis/credentials/serviceaccountkey")
+      this.stopProcess()
     }
 
     // Other errors will just warn
-    pulse.emit('warning', message, `https://youtu.be/${videoId}`);
+    pulse.emit("warning", message, `https://youtu.be/${videoId}`)
   },
 
   /**
@@ -164,7 +160,7 @@ const module = {
    **/
   stopProcess() {
     // eslint-disable-next-line no-process-exit
-    process.exit(1);
+    process.exit(1)
   },
 
   /**
@@ -175,35 +171,35 @@ const module = {
    * @return {Array} An array of entities
    **/
   async getEntities(videoId, input) {
-    const cacheHit = cache.read(videoId, input);
+    const cacheHit = cache.read(videoId, input)
     if (cacheHit) {
-      return cacheHit;
+      return cacheHit
     }
 
     const options = {
       content: input,
-      type: 'PLAIN_TEXT',
-    };
-
-    let results;
-    try {
-      results = await this.client().analyzeEntities({ document: options });
-    } catch (err) {
-      this.handleGoogleApiErrors(err, videoId);
-      return [];
+      type: "PLAIN_TEXT",
     }
 
-    const entities = results[0].entities;
+    let results
+    try {
+      results = await this.client().analyzeEntities({ document: options })
+    } catch (err) {
+      this.handleGoogleApiErrors(err, videoId)
+      return []
+    }
+
+    const entities = results[0].entities
 
     // Save the API result to disk for debug purposes
-    const logPath = `language/${globals.configName()}/${uuid()}.json`;
-    const logResults = { input, results };
-    diskLogger.write(logPath, logResults);
+    const logPath = `language/${globals.configName()}/${uuid()}.json`
+    const logResults = { input, results }
+    diskLogger.write(logPath, logResults)
 
     // Save to cache as well
-    cache.write(videoId, input, entities);
+    cache.write(videoId, input, entities)
 
-    return entities;
+    return entities
   },
 
   /**
@@ -212,16 +208,14 @@ const module = {
    * @return {Array} Array of object containing speaker data
    **/
   async getSpeakers(video) {
-    const videoTitle = _.get(video, 'video.title');
-    const videoId = _.get(video, 'video.id');
-    const entities = await this.getEntities(videoId, videoTitle);
+    const videoTitle = _.get(video, "video.title")
+    const videoId = _.get(video, "video.id")
+    const entities = await this.getEntities(videoId, videoTitle)
 
-    let matchingEntities = _.filter(entities, { type: 'PERSON' });
-    matchingEntities = _.filter(matchingEntities, entity =>
-      _.find(entity.mentions, { type: 'PROPER' })
-    );
+    let matchingEntities = _.filter(entities, { type: "PERSON" })
+    matchingEntities = _.filter(matchingEntities, entity => _.find(entity.mentions, { type: "PROPER" }))
 
-    return _.map(matchingEntities, speaker => ({ name: speaker.name }));
+    return _.map(matchingEntities, speaker => ({ name: speaker.name }))
   },
 
   /**
@@ -230,29 +224,31 @@ const module = {
    * @returns {Array} Enriched list of videos
    **/
   async enrichVideos(videos) {
-    const grabCache = this.cache.grab;
-    const enrichVideo = this.enrichVideo;
-    const releaseCache = this.cache.release;
+    const grabCache = this.cache.grab
+    const enrichVideo = this.enrichVideo
+    const releaseCache = this.cache.release
 
-    pulse.emit('enrich:start', { videoCount: videos.length });
-    const shouldUseCache = globals.readFromCache();
+    pulse.emit("enrich:start", { videoCount: videos.length })
+    const shouldUseCache = globals.readFromCache()
     if (shouldUseCache) {
-      await grabCache();
+      await grabCache()
     }
 
     const newVideos = await pMap(videos, async video => {
-      const newVideo = await enrichVideo(video);
-      pulse.emit('enrich:chunk');
-      return newVideo;
-    });
+      // TODO FIXME : do not enrich videos
+      //const newVideo = await enrichVideo(video)
+      //pulse.emit("enrich:chunk")
+      //return newVideo
+      return video
+    })
 
     if (shouldUseCache) {
-      await releaseCache();
+      await releaseCache()
     }
 
-    pulse.emit('enrich:end');
-    return newVideos;
+    pulse.emit("enrich:end")
+    return newVideos
   },
-};
+}
 
-export default _.bindAll(module, _.functions(module));
+export default _.bindAll(module, _.functions(module))

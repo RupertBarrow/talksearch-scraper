@@ -4,3 +4,5 @@ node_modules
 google.service-account-file.json
 cache
 logs
+
+.DS_Store

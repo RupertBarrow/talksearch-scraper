@@ -1,5 +1,5 @@
 const WRITE_RESPONSE_LOGS = process.env.WRITE_RESPONSE_LOGS;
-import fileutils from './fileutils';
+import fileutils from './fileutils.js';
 import _ from 'lodash';
 
 const module = {

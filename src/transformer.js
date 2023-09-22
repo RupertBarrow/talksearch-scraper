@@ -1,8 +1,8 @@
-import _ from 'lodash';
-import dayjs from 'dayjs';
-import globals from './globals';
-import configHelper from '../configs/config-helper';
-import language from '../src/language';
+import _ from "lodash"
+import dayjs from "dayjs"
+import globals from "./globals.js"
+import configHelper from "../configs/config-helper.js"
+import language from "../src/language.js"
 
 const module = {
   /**
@@ -13,10 +13,10 @@ const module = {
    * @return {Number} Popularity score
    **/
   getPopularityScore(videoData) {
-    if (!_.has(videoData, 'popularity')) {
-      return 0;
+    if (!_.has(videoData, "popularity")) {
+      return 0
     }
-    return _.sum(_.values(_.get(videoData, 'popularity')));
+    return _.sum(_.values(_.get(videoData, "popularity")))
   },
 
   /**
@@ -27,17 +27,17 @@ const module = {
    * @returns {Object} An object of capped timestamps
    **/
   getBucketedDate(timestamp) {
-    const date = dayjs(timestamp * 1000);
-    const yearGranularity = date.startOf('year');
-    const monthGranularity = date.startOf('month');
-    const dayGranularity = date.startOf('day');
+    const date = dayjs(timestamp * 1000)
+    const yearGranularity = date.startOf("year")
+    const monthGranularity = date.startOf("month")
+    const dayGranularity = date.startOf("day")
 
     return {
       year: yearGranularity.unix(),
       month: monthGranularity.unix(),
       day: dayGranularity.unix(),
       timestamp: date.unix(),
-    };
+    }
   },
 
   /**
@@ -47,11 +47,11 @@ const module = {
    * @returns {String} Url pointing to the specific time in the video
    **/
   getCaptionUrl(videoId, start) {
-    let url = `https://www.youtube.com/watch?v=${videoId}`;
+    let url = `https://www.youtube.com/watch?v=${videoId}`
     if (start > 0) {
-      url = `${url}&t=${start}s`;
+      url = `${url}&t=${start}s`
     }
-    return url;
+    return url
   },
 
   /**
@@ -62,7 +62,7 @@ const module = {
    * @returns {Object} An object representing a caption
    **/
   getCaptionDetails(userCaption, position, videoId) {
-    let caption = userCaption;
+    let caption = userCaption
     // Always adding a caption, even if empty, it makes the front-end logic easier
     // to handle
     if (!caption) {
@@ -70,20 +70,20 @@ const module = {
         content: null,
         duration: 0,
         start: 0,
-      };
+      }
     }
 
     // Round start to exact second because we can't jump to more precise than
     // that
-    const start = _.floor(caption.start);
-    const url = this.getCaptionUrl(videoId, start);
+    const start = _.floor(caption.start)
+    const url = this.getCaptionUrl(videoId, start)
 
     return {
       ...caption,
       position,
       start,
       url,
-    };
+    }
   },
 
   /**
@@ -93,49 +93,49 @@ const module = {
    **/
   recordsFromVideo(video) {
     // Enhanced video data
-    const videoDetails = { ...video.video };
-    _.set(
-      videoDetails,
-      'popularity.score',
-      this.getPopularityScore(videoDetails)
-    );
-    _.set(
-      videoDetails,
-      'publishedDate',
-      this.getBucketedDate(videoDetails.publishedDate)
-    );
+    const videoDetails = { ...video.video }
+
+    //console.log("recordsFromVideo VIDEO", video)
+
+    _.set(videoDetails, "id", video.id)
+    _.set(videoDetails, "title", video.title)
+    _.set(videoDetails, "url", video.url)
+    _.set(videoDetails, "duration", video.duration) // in seconds
+    _.set(videoDetails, "thumbnail", video.thumbnails.default.url)
+    _.set(videoDetails, "popularity.score", this.getPopularityScore(video))
+    _.set(videoDetails, "publishedDate", this.getBucketedDate(video.publishedDate))
 
     // Base record metadata to add to all records
     let baseRecord = {
       video: videoDetails,
       playlist: video.playlist,
       channel: video.channel,
-      speakers: video.speakers,
-      conference: video.conference,
-    };
+      //speakers: video.speakers,
+      //conference: video.conference,
+    }
 
     // Config specific updates
-    const config = globals.config();
-    if (_.get(config, 'transformData')) {
-      baseRecord = config.transformData(baseRecord, configHelper);
+    const config = globals.config()
+    if (_.get(config, "transformData")) {
+      baseRecord = config.transformData(baseRecord, configHelper)
     }
 
     // One record per caption, with a minimum of 1 even if no captions
-    let captions = _.get(video, 'captions');
+    let captions = _.get(video, "captions")
     if (_.isEmpty(captions)) {
-      captions = [undefined];
+      captions = [undefined]
     }
 
     return _.map(captions, (caption, position) => {
-      const videoId = baseRecord.video.id;
-      const captionDetails = this.getCaptionDetails(caption, position, videoId);
+      const videoId = baseRecord.video.id
+      const captionDetails = this.getCaptionDetails(caption, position, videoId)
       const record = {
         ...baseRecord,
         caption: captionDetails,
-      };
+      }
 
-      return record;
-    });
+      return record
+    })
   },
 
   /**
@@ -144,15 +144,15 @@ const module = {
    * @returns {Number} The conference year
    **/
   guessConferenceYear(video) {
-    const playlistTitle = _.get(video, 'playlist.title', null);
+    const playlistTitle = _.get(video, "playlist.title", null)
     if (!playlistTitle) {
-      return null;
+      return null
     }
-    const matches = playlistTitle.match(/[0-9]{4}/);
+    const matches = playlistTitle.match(/[0-9]{4}/)
     if (!matches) {
-      return null;
+      return null
     }
-    return _.parseInt(matches);
+    return _.parseInt(matches)
   },
 
   /**
@@ -164,7 +164,7 @@ const module = {
    **/
   async enrichVideos(inputVideos) {
     // Extract speakers from text analysis of the title
-    let videos = await language.enrichVideos(inputVideos);
+    let videos = await language.enrichVideos(inputVideos)
 
     // Guessing conference year
     videos = _.map(videos, video => ({
@@ -172,20 +172,21 @@ const module = {
       conference: {
         year: this.guessConferenceYear(video),
       },
-    }));
+    }))
 
-    return videos;
+    return videos
   },
 
   async run(inputVideos) {
     // Enrich videos
-    const videos = await this.enrichVideos(inputVideos);
+    const videos = await this.enrichVideos(inputVideos)
 
     // Convert videos to records
-    const records = _.flatten(_.map(videos, this.recordsFromVideo));
+    const records = _.flatten(_.map(videos, this.recordsFromVideo))
 
-    return records;
+    console.log("recordsFromVideo RECORDS", records[0])
+    return records
   },
-};
+}
 
-export default _.bindAll(module, _.functions(module));
+export default _.bindAll(module, _.functions(module))

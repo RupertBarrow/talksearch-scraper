@@ -1,12 +1,12 @@
-import stringify from 'json-stable-stringify';
-import _ from 'lodash';
-import fs from 'fs';
-import path from 'path';
-import mkdirpCallback from 'mkdirp';
-import glob from 'glob';
-import pify from 'pify';
-const writeFile = pify(fs.writeFile);
-const mkdirp = pify(mkdirpCallback);
+import stringify from "json-stable-stringify"
+import _ from "lodash"
+import fs from "fs"
+import path from "path"
+import mkdirpCallback from "mkdirp"
+import glob from "glob"
+import pify from "pify"
+const writeFile = pify(fs.writeFile)
+const mkdirp = pify(mkdirpCallback)
 
 const module = {
   /**
@@ -16,9 +16,9 @@ const module = {
    **/
   async glob(pattern) {
     if (!this._glob) {
-      this._glob = pify(glob);
+      this._glob = pify(glob)
     }
-    return await this._glob(pattern);
+    return await this._glob(pattern)
   },
 
   /**
@@ -26,11 +26,11 @@ const module = {
    * @param {String} filepath Filepath of the file to read
    * @returns {String} Content of the file read
    **/
-  async read(filepath) {
+  async read(filepath, encoding = "utf8") {
     if (!this._readFile) {
-      this._readFile = pify(fs.readFile);
+      this._readFile = pify(fs.readFile)
     }
-    return await this._readFile(filepath);
+    return await this._readFile(filepath, encoding)
   },
 
   /**
@@ -41,10 +41,10 @@ const module = {
    **/
   async readJson(source) {
     try {
-      const content = await this.read(source);
-      return JSON.parse(content);
+      const content = await this.read(source)
+      return JSON.parse(content)
     } catch (err) {
-      return null;
+      return null
     }
   },
 
@@ -56,9 +56,9 @@ const module = {
    * Note: It will create the directories if needed
    **/
   async write(destination, content) {
-    await mkdirp(path.dirname(destination));
-    await writeFile(destination, content);
-    return;
+    await mkdirp(path.dirname(destination))
+    await writeFile(destination, content)
+    return
   },
 
   /**
@@ -68,10 +68,10 @@ const module = {
    * @returns {Void}
    **/
   async writeJson(destination, data) {
-    const content = stringify(data, { space: 2 });
-    await this.write(destination, content);
-    return;
+    const content = stringify(data, { space: 2 })
+    await this.write(destination, content)
+    return
   },
-};
+}
 
-export default _.bindAll(module, _.functions(module));
+export default _.bindAll(module, _.functions(module))

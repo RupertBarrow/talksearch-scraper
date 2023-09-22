@@ -1,37 +1,46 @@
-let CONFIG = {};
-let CONFIG_NAME = null;
-const ALGOLIA_API_KEY = process.env.ALGOLIA_API_KEY;
-const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID;
-const READ_FROM_CACHE = process.env.READ_FROM_CACHE || false;
-const WRITE_RESPONSE_LOGS = process.env.WRITE_RESPONSE_LOGS || false;
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+let CONFIG = {}
+let CONFIG_NAME = null
+let READ_FROM_CACHE = false
+let WRITE_RESPONSE_LOGS = false
+let YOUTUBE_API_KEY = null
+let ALGOLIA_API_KEY = null
+let ALGOLIA_APP_ID = null
 
 const globals = {
-  init(configName) {
-    CONFIG_NAME = configName;
-    CONFIG = import(`../configs/${configName}.js`).default;
+  CONFIG: {},
+  CONFIG_NAME: null,
+
+  async init(configName) {
+    CONFIG_NAME = configName
+    CONFIG = import(`../configs/${configName}.js`).default
+    READ_FROM_CACHE = process.env.READ_FROM_CACHE
+    WRITE_RESPONSE_LOGS = process.env.WRITE_RESPONSE_LOGS
+    YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY
+    ALGOLIA_API_KEY = process.env.ALGOLIA_API_KEY
+    ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID
+    console.log("GLOBALS CONFIG", this.CONFIG)
   },
   readFromCache() {
-    return READ_FROM_CACHE;
+    return READ_FROM_CACHE
   },
   writeResponseLogs() {
-    return WRITE_RESPONSE_LOGS;
+    return WRITE_RESPONSE_LOGS
   },
   config() {
-    return CONFIG;
+    return CONFIG
   },
   configName() {
-    return CONFIG_NAME;
+    return CONFIG_NAME
   },
   youtubeApiKey() {
-    return YOUTUBE_API_KEY;
+    return YOUTUBE_API_KEY
   },
   algoliaAppId() {
-    return ALGOLIA_APP_ID;
+    return ALGOLIA_APP_ID
   },
   algoliaApiKey() {
-    return ALGOLIA_API_KEY;
+    return ALGOLIA_API_KEY
   },
-};
+}
 
-export default globals;
+export default globals
