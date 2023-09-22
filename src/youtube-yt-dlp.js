@@ -259,19 +259,23 @@ export default class YoutubeYtdlp {
 
     pulse.emit("youtube:crawling:start", { playlists: channels })
 
-    const allVideos = await channels.map(async channelFolderName => {
-      const videos = await this.getVideosFromPlaylist(pathToSource, channelFolderName)
+    const channelArrayOfVideosArray = await Promise.all(
+      channels.map(async channelFolderName => {
+        const videos = await this.getVideosFromPlaylist(pathToSource, channelFolderName)
 
-      console.log("")
-      console.log("getVideosFromYtdlpFolder VIDEOS", videos.length, channelFolderName)
+        console.log("")
+        console.log("getVideosFromYtdlpFolder VIDEOS", videos.length, channelFolderName)
 
-      await fileutils.writeJson(`./cache/${configName}/youtube-yt-dlp/${channelFolderName}.json`, videos)
+        await fileutils.writeJson(`./cache/${configName}/youtube-yt-dlp/${channelFolderName}.json`, videos)
 
-      return videos
-    })
+        return videos
+      })
+    )
 
     pulse.emit("youtube:crawling:end")
-    return _.flatten(allVideos)
+    const flat = _.flatten(channelArrayOfVideosArray)
+    console.log("getVideosFromYtdlpFolder ALLVIDEOS FLAT", flat.length, flat.slice(0, 2))
+    return flat
   }
 
   /**

@@ -182,13 +182,16 @@ const module = {
   },
 
   async run(inputVideos) {
+    console.log("transformer.run INPUT VIDEOS", inputVideos)
+
     // Enrich videos
     const videos = await this.enrichVideos(inputVideos)
+    console.log("transformer.run VIDEOS", videos)
 
     // Convert videos to records
     const records = _.flatten(_.map(videos, this.recordsFromVideo))
 
-    console.log("recordsFromVideo RECORDS", records[0])
+    console.log("transformer.run RECORDS", records.length, records.slice(0, 2))
     return records
   },
 }
