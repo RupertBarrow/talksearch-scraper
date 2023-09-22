@@ -103,7 +103,7 @@ export default class YoutubeYtdlp {
                 return {
                   id: `${videoMetadata.id}__${caption.position}`,
                   ...caption,
-                  video: videoMetadata,
+                  //video: videoMetadata,
                 }
               }),
             }
@@ -206,11 +206,13 @@ export default class YoutubeYtdlp {
       indexName: "yt-dlp",
       pathToSource: "/Volumes/Altius Backup Box/LA RÉALITÉ Vidéos/yt-dlp downloads/Youtube",
       channels: [
+        /*
         "Aquarius Rising Africa Ⅱ",
         "116000 Enfants Disparus",
-        /*
         "The reveal report",
+        */
         "Right on Radio CH 2",
+        /*
         "Retour à Outreau",
         "Alexandre Lebreton",
         "Alexandre Lebreton - chaîne secondaire",
