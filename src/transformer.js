@@ -191,7 +191,7 @@ const module = {
     // Convert videos to records
     const records = _.flatten(_.map(videos, this.recordsFromVideo))
 
-    console.log("transformer.run RECORDS", records.length, records.slice(0, 2))
+    console.log("transformer.run RECORDS", records.length, records.slice(14, 16))
     return records
   },
 }
