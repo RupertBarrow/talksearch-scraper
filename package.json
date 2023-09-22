@@ -13,7 +13,6 @@
     "index:logs": "WRITE_RESPONSE_LOGS=1 babel-node ./scripts/index.js",
     "new:config": "babel-node ./scripts/new-config.js",
     "thumbnails": "./scripts/thumbnails i-p9lWIhcLQ",
-    "precommit": "yarn lint",
     "prepush": "yarn test"
   },
   "repository": {
