@@ -10,7 +10,12 @@ export class Srt {
     this.filename = `${videoFolderPath}/${videoFilename}.${languageExtension}`
   }
 
-  // write the parseSRTTime function
+  /**
+   * Return SRT time into seconds, dropping milliseconds
+   *
+   * @param {*} time
+   * @returns
+   */
   parseSRTTime(time) {
     const timeParts = time.split(":")
 
@@ -20,7 +25,7 @@ export class Srt {
     const seconds = parseInt(secondsParts[0])
     const milliseconds = parseInt(secondsParts[1])
 
-    return hours * 60 * 60 * 1000 + minutes * 60 * 1000 + seconds * 1000 + milliseconds
+    return hours * 60 * 60 + minutes * 60 + seconds
   }
 
   parseSrtContents(srtContents) {
@@ -74,9 +79,8 @@ export class Srt {
    * @returns Talksearch caption object
    */
 
-  static srtJsonToInstantSearch(subtitleJson, youtubeUrlString, duration) {
+  static srtJsonToInstantSearch(subtitleJson, youtubeUrlString, timeMarker) {
     const sub = subtitleJson
-    duration += sub.dur
 
     // prettier-ignore
     const subtitle = {
@@ -85,10 +89,10 @@ export class Srt {
           start:    sub.start,
           duration: sub.dur,
           content:  sub.text,
-          url:      `${youtubeUrlString}&t=${duration}s`
+          url:      `${youtubeUrlString}&t=${timeMarker}`
         }
 
-    return [duration, subtitle]
+    return [timeMarker + sub.dur, subtitle]
   }
 
   static groupSubs(subs, size, context) {
@@ -149,6 +153,7 @@ export class Srt {
     const contents = await fileutils.read(`${srt.filename}`)
 
     const subs = srt.parseSrtContents(contents)
+    if (debug) console.log("getSubs() SUBS", subs.slice(0, 24))
     const res = Srt.groupSubs(subs, NB_SUBTITLES_PER_GROUP, CONTEXT_SIZE)
     if (debug) console.log("getSubs() RES", res.slice(0, 2))
     return res

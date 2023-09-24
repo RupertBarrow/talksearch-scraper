@@ -368,7 +368,6 @@ export default class YoutubeYtdlp {
         "ydal agag",
         "ytdlp.sh",
         "ziya dali",
-        "Aquarius Rising Africa Ⅱ",
         "116000 Enfants Disparus",
         "The reveal report",
         "Right on Radio CH 2",

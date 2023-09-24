@@ -49,7 +49,7 @@ const module = {
   getCaptionUrl(videoId, start) {
     let url = `https://www.youtube.com/watch?v=${videoId}`
     if (start > 0) {
-      url = `${url}&t=${start}s`
+      url = `${url}&t=${start}`
     }
     return url
   },
